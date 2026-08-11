@@ -42,6 +42,51 @@ albumsRouter.get('/', async (req, res) => {
     }
 });
 
+albumsRouter.get('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (!mongoose.isValidObjectId(id)) {
+            res.status(400).send({
+                message: 'Invalid album ID',
+            });
+
+            return;
+        }
+
+        const album = await Album.findById(id);
+
+        if (!album) {
+            res.status(404).send({
+                message: 'Album not found',
+            });
+
+            return;
+        }
+
+        const artist = await Artist.findById(album.artist);
+
+        if (!artist) {
+            res.status(404).send({
+                message: 'Artist not found',
+            });
+
+            return;
+        }
+
+        res.send({
+            ...album.toObject(),
+            artist,
+        });
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).send({
+            message: 'Internal server error',
+        });
+    }
+});
+
 albumsRouter.post('/', async (req, res) => {
     try {
         const { name, artist, year, image } = req.body;
