@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Alert, CircularProgress, Paper, Typography } from '@mui/material';
+import { Alert, CircularProgress, Paper } from '@mui/material';
 import axiosApi from '../api/axiosApi';
 import type { Album, Artist, Track } from '../types';
 import TrackList from '../components/TrackList';
+import BackButton from '../components/BackButton';
+import PageTitle from '../components/PageTitle';
 
 type AlbumResponse = Omit<Album, 'artist'> & {
     artist: Artist;
@@ -85,22 +87,14 @@ const AlbumPage = () => {
 
     return (
         <>
-            <Typography
-                variant="h4"
-                component="h1"
-                gutterBottom
-            >
-                {album.artist.name}
-            </Typography>
-
-            <Typography
-                variant="h5"
-                component="h2"
-                sx={{ mb: 3 }}
-            >
-                {album.name}
-            </Typography>
-
+            <BackButton
+                to={`/artists/${album.artist._id}`}
+                text={`Back to ${album.artist.name}`}
+            />
+            <PageTitle
+                title={album.name}
+                subtitle={`${album.artist.name} • ${album.year}`}
+            />
             <Paper>
                 <TrackList tracks={tracks} />
             </Paper>

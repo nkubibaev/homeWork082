@@ -1,31 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-
-import {
-    Alert,
-    CircularProgress,
-    Grid,
-    Typography,
-} from '@mui/material';
-
+import { Alert, CircularProgress, Grid } from '@mui/material';
 import axiosApi from '../api/axiosApi';
 import type { Album, Artist } from '../types';
 import AlbumCard from '../components/AlbumCard';
+import BackButton from '../components/BackButton';
+import PageTitle from '../components/PageTitle';
 
 const ArtistPage = () => {
     const { id = null } = useParams();
-
-    const [artist, setArtist] = useState<Artist | null>(
-        null,
-    );
-
+    const [artist, setArtist] = useState<Artist | null>(null);
     const [albums, setAlbums] = useState<Album[]>([]);
-
     const [loading, setLoading] = useState(true);
-
-    const [error, setError] = useState<string | null>(
-        null,
-    );
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (id === null) {
@@ -40,24 +27,15 @@ const ArtistPage = () => {
                 setLoading(true);
                 setError(null);
 
-                const [
-                    artistResponse,
-                    albumsResponse,
-                ] = await Promise.all([
-                    axiosApi.get<Artist>(
-                        `/artists/${id}`,
-                    ),
-                    axiosApi.get<Album[]>(
-                        `/albums?artist=${id}`,
-                    ),
+                const [ artistResponse, albumsResponse ] = await Promise.all([
+                    axiosApi.get<Artist>(`/artists/${id}`),
+                    axiosApi.get<Album[]>(`/albums?artist=${id}`)
                 ]);
 
                 setArtist(artistResponse.data);
                 setAlbums(albumsResponse.data);
             } catch {
-                setError(
-                    'Failed to load artist data',
-                );
+                setError('Failed to load artist data');
             } finally {
                 setLoading(false);
             }
@@ -88,18 +66,15 @@ const ArtistPage = () => {
 
     return (
         <>
-            <Typography
-                variant="h4"
-                component="h1"
-                sx={{ mb: 4 }}
-            >
-                {artist.name}
-            </Typography>
-
-            <Grid
-                container
-                spacing={3}
-            >
+            <BackButton
+                to="/"
+                text="Back to artists"
+            />
+            <PageTitle
+                title={artist.name}
+                subtitle="Albums"
+            />
+            <Grid container spacing={3}>
                 {albums.map((album) => (
                     <Grid
                         key={album._id}

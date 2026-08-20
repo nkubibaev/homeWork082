@@ -1,30 +1,33 @@
-import {
-    AppBar,
-    Button,
-    Container,
-    Toolbar,
-    Typography,
-} from '@mui/material';
-
-import {
-    NavLink,
-    Route,
-    Routes,
-} from 'react-router-dom';
-
+import { AppBar, Box, Button, Container, Toolbar, Typography } from '@mui/material';
+import { NavLink, Route, Routes } from 'react-router-dom';
 import ArtistsPage from './pages/ArtistsPage';
-import ArtistPage from "./pages/ArtistPage.tsx";
-import AlbumPage from "./pages/AlbumPage.tsx";
+import ArtistPage from './pages/ArtistPage';
+import AlbumPage from './pages/AlbumPage';
 
 const App = () => {
     return (
-        <>
-            <AppBar position="static">
+        <Box
+            sx={{
+                minHeight: '100vh',
+                bgcolor: '#f5f5f5',
+            }}
+        >
+            <AppBar
+                position="sticky"
+                elevation={0}
+            >
                 <Toolbar>
                     <Typography
-                        variant="h6"
-                        component="div"
-                        sx={{ flexGrow: 1 }}
+                        variant="h5"
+                        component={NavLink}
+                        to="/"
+                        sx={{
+                            flexGrow: 1,
+                            color: 'inherit',
+                            textDecoration: 'none',
+                            fontWeight: 700,
+                            letterSpacing: 1,
+                        }}
                     >
                         Music App
                     </Typography>
@@ -33,6 +36,9 @@ const App = () => {
                         color="inherit"
                         component={NavLink}
                         to="/"
+                        sx={{
+                            fontWeight: 600,
+                        }}
                     >
                         Artists
                     </Button>
@@ -41,24 +47,20 @@ const App = () => {
 
             <Container
                 maxWidth="lg"
-                sx={{ py: 4 }}
+                sx={{
+                    py: {
+                        xs: 3,
+                        md: 5,
+                    },
+                }}
             >
                 <Routes>
-                    <Route
-                        path="/"
-                        element={<ArtistsPage />}
-                    />
-                    <Route
-                        path="/artists/:id"
-                        element={<ArtistPage />}
-                    />
-                    <Route
-                        path="/albums/:id"
-                        element={<AlbumPage />}
-                    />
+                    <Route path="/" element={<ArtistsPage />} />
+                    <Route path="/artists/:id" element={<ArtistPage />} />
+                    <Route path="/albums/:id" element={<AlbumPage />} />
                 </Routes>
             </Container>
-        </>
+        </Box>
     );
 };
 

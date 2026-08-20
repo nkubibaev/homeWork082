@@ -1,5 +1,12 @@
-import { Card, CardActionArea, CardContent, CardMedia, Typography } from '@mui/material';
+import {
+    Card,
+    CardActionArea,
+    CardContent,
+    CardMedia,
+    Typography,
+} from '@mui/material';
 import { Link } from 'react-router-dom';
+
 import type { Artist } from '../types';
 
 interface Props {
@@ -8,27 +15,43 @@ interface Props {
 
 const ArtistCard = ({ artist }: Props) => {
     return (
-        <Card>
+        <Card
+            elevation={2}
+            sx={{
+                height: '100%',
+                borderRadius: 3,
+                overflow: 'hidden',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                '&:hover': {
+                    transform: 'translateY(-5px)',
+                    boxShadow: 6,
+                },
+            }}
+        >
             <CardActionArea
                 component={Link}
                 to={`/artists/${artist._id}`}
+                sx={{ height: '100%' }}
             >
                 {artist.photo !== null ? (
                     <CardMedia
                         component="img"
-                        height="240"
+                        height="280"
                         image={`http://localhost:8000${artist.photo}`}
                         alt={artist.name}
+                        sx={{
+                            objectFit: 'cover',
+                        }}
                     />
                 ) : (
                     <CardMedia
                         component="div"
                         sx={{
-                            height: 240,
+                            height: 280,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            backgroundColor: 'grey.200',
+                            bgcolor: 'grey.200',
                         }}
                     >
                         <Typography color="text.secondary">
@@ -37,7 +60,11 @@ const ArtistCard = ({ artist }: Props) => {
                     </CardMedia>
                 )}
 
-                <CardContent>
+                <CardContent
+                    sx={{
+                        py: 2.5,
+                    }}
+                >
                     <Typography
                         variant="h6"
                         component="h2"

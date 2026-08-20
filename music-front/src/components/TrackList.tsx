@@ -1,10 +1,4 @@
-import {
-    List,
-    ListItem,
-    ListItemText,
-    Typography,
-} from '@mui/material';
-
+import { List, ListItem, ListItemText, Typography } from '@mui/material';
 import type { Track } from '../types';
 
 interface Props {
@@ -13,25 +7,35 @@ interface Props {
 
 const TrackList = ({ tracks }: Props) => {
     return (
-        <List>
+        <List disablePadding>
             {tracks.map((track) => (
                 <ListItem
                     key={track._id}
                     divider
+                    sx={{
+                        px: 3,
+                        py: 2,
+                    }}
                 >
                     <Typography
                         sx={{
-                            width: 50,
+                            width: 48,
                             fontWeight: 600,
+                            color: 'text.secondary',
                         }}
                     >
-                        {track.trackNumber}.
+                        {track.trackNumber}
                     </Typography>
 
                     <ListItemText
                         primary={track.name}
-                        secondary={track.duration}
                     />
+
+                    <Typography
+                        color="text.secondary"
+                    >
+                        {track.duration}
+                    </Typography>
                 </ListItem>
             ))}
         </List>
