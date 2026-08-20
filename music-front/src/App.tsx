@@ -14,6 +14,7 @@ import {
 
 import ArtistsPage from './pages/ArtistsPage';
 import ArtistPage from "./pages/ArtistPage.tsx";
+import AlbumPage from "./pages/AlbumPage.tsx";
 
 const App = () => {
     return (
@@ -50,6 +51,10 @@ const App = () => {
                     <Route
                         path="/artists/:id"
                         element={<ArtistPage />}
+                    />
+                    <Route
+                        path="/albums/:id"
+                        element={<AlbumPage />}
                     />
                 </Routes>
             </Container>
