@@ -13,6 +13,7 @@ import {
 } from 'react-router-dom';
 
 import ArtistsPage from './pages/ArtistsPage';
+import ArtistPage from "./pages/ArtistPage.tsx";
 
 const App = () => {
     return (
@@ -45,6 +46,10 @@ const App = () => {
                     <Route
                         path="/"
                         element={<ArtistsPage />}
+                    />
+                    <Route
+                        path="/artists/:id"
+                        element={<ArtistPage />}
                     />
                 </Routes>
             </Container>

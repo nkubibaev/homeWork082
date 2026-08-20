@@ -1,8 +1,41 @@
 import { Router } from 'express';
 import Artist from '../models/Artist.js';
 import { imagesUpload } from '../multer.js';
+import mongoose from "mongoose";
 
 const artistsRouter = Router();
+
+artistsRouter.get('/:id', async (req, res) => {
+    try {
+        const { id = null } = req.params;
+
+        if (id === null || !mongoose.isValidObjectId(id)) {
+            res.status(400).send({
+                message: 'Invalid artist ID',
+            });
+
+            return;
+        }
+
+        const artist = await Artist.findById(id);
+
+        if (!artist) {
+            res.status(404).send({
+                message: 'Artist not found',
+            });
+
+            return;
+        }
+
+        res.send(artist);
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).send({
+            error: 'Internal server error',
+        });
+    }
+});
 
 artistsRouter.get('/', async (_req, res) => {
     try {
