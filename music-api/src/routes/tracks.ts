@@ -9,7 +9,7 @@ tracksRouter.get('/', async (req, res) => {
     try {
         const { album } = req.query;
 
-        if (album !== undefined) {
+        if (album !== null) {
             if (
                 typeof album !== 'string' ||
                 !mongoose.isValidObjectId(album)
@@ -21,15 +21,13 @@ tracksRouter.get('/', async (req, res) => {
                 return;
             }
 
-            const tracks = await Track.find({album});
-
+            const tracks = await Track.find({ album }).sort({ trackNumber: 1 });
             res.send(tracks);
 
             return;
         }
 
-        const tracks = await Track.find();
-
+        const tracks = await Track.find().sort({ trackNumber: 1 });
         res.send(tracks);
     } catch (error) {
         console.error(error);
@@ -42,7 +40,7 @@ tracksRouter.get('/', async (req, res) => {
 
 tracksRouter.post('/', async (req, res) => {
     try {
-        const { name, album, duration } = req.body;
+        const { name, album, trackNumber, duration } = req.body;
 
         if (!name || typeof name !== 'string' || !name.trim()) {
             res.status(400).send({
@@ -60,8 +58,19 @@ tracksRouter.post('/', async (req, res) => {
             return;
         }
 
-        if (
-            !duration ||
+        if (trackNumber === null ||
+            typeof trackNumber !== 'number' ||
+            !Number.isInteger(trackNumber) ||
+            trackNumber < 1
+        ) {
+            res.status(400).send({
+                message: 'Track number must be a positive integer',
+            });
+
+            return;
+        }
+
+        if (!duration ||
             typeof duration !== 'string' ||
             !duration.trim()
         ) {
@@ -85,6 +94,7 @@ tracksRouter.post('/', async (req, res) => {
         const track = await Track.create({
             name: name.trim(),
             album,
+            trackNumber,
             duration: duration.trim(),
         });
 

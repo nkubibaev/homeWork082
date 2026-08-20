@@ -7,13 +7,15 @@ const trackSchema = new Schema(
             required: true,
             trim: true,
         },
-
         album: {
             type: Types.ObjectId,
             ref: 'Album',
             required: true,
         },
-
+        trackNumber: {
+            type: Number,
+            required: true,
+        },
         duration: {
             type: String,
             required: true,
@@ -24,6 +26,7 @@ const trackSchema = new Schema(
         versionKey: false,
     },
 );
+
 
 const Track = model('Track', trackSchema);
 export default Track;

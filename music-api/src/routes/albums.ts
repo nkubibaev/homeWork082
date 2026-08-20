@@ -9,11 +9,8 @@ albumsRouter.get('/', async (req, res) => {
     try {
         const { artist } = req.query;
 
-        if (artist !== undefined) {
-            if (
-                typeof artist !== 'string' ||
-                !mongoose.isValidObjectId(artist)
-            ) {
+        if (artist !== null) {
+            if (typeof artist !== 'string' || !mongoose.isValidObjectId(artist)) {
                 res.status(400).send({
                     error: 'Invalid artist ID',
                 });
@@ -21,17 +18,13 @@ albumsRouter.get('/', async (req, res) => {
                 return;
             }
 
-            const albums = await Album.find({
-                artist,
-            });
-
+            const albums = await Album.find({ artist }).sort({ year: -1 });
             res.send(albums);
 
             return;
         }
 
-        const albums = await Album.find();
-
+        const albums = await Album.find().sort({ year: -1 });
         res.send(albums);
     } catch (error) {
         console.error(error);
