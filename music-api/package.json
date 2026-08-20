@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "seed": "tsx src/fixtures/seed.ts"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

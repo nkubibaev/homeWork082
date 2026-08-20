@@ -8,6 +8,7 @@ const rootPath: string = path.dirname(
 const config = {
     rootPath,
     publicPath: path.join(rootPath, '../public'),
+    mongoDbUrl: 'mongodb://127.0.0.1:27017/music-api'
 };
 
 export default config;
