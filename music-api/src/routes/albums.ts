@@ -1,13 +1,14 @@
 import { Router } from 'express';
 import mongoose from 'mongoose';
-import Album  from '../models/Album.js';
+import Album from '../models/Album.js';
 import Artist from '../models/Artist.js';
+import { imagesUpload } from '../multer.js';
 
 const albumsRouter = Router();
 
 albumsRouter.get('/', async (req, res) => {
     try {
-        const { artist } = req.query;
+        const { artist = null } = req.query;
 
         if (artist !== null) {
             if (typeof artist !== 'string' || !mongoose.isValidObjectId(artist)) {
@@ -30,16 +31,16 @@ albumsRouter.get('/', async (req, res) => {
         console.error(error);
 
         res.status(500).send({
-            message: 'Internal server error',
+            error: 'Internal server error',
         });
     }
 });
 
 albumsRouter.get('/:id', async (req, res) => {
     try {
-        const { id } = req.params;
+        const { id = null } = req.params;
 
-        if (!mongoose.isValidObjectId(id)) {
+        if ( id === null || !mongoose.isValidObjectId(id)) {
             res.status(400).send({
                 message: 'Invalid album ID',
             });
@@ -75,64 +76,73 @@ albumsRouter.get('/:id', async (req, res) => {
         console.error(error);
 
         res.status(500).send({
-            message: 'Internal server error',
+            error: 'Internal server error',
         });
     }
 });
 
-albumsRouter.post('/', async (req, res) => {
-    try {
-        const { name, artist, year, image } = req.body;
+albumsRouter.post('/', imagesUpload.single('image'),
+    async (req, res) => {
+        try {
+            const { name = null, artist = null, year = null } = req.body;
+            const image = req.file
+                ? `/images/${req.file.filename}`
+                : null;
 
-        if (!name || typeof name !== 'string' || !name.trim()) {
-            res.status(400).send({
-                message: 'Name is required',
+            if (typeof name !== 'string' || !name.trim()) {
+                res.status(400).send({
+                    message: 'Name is required',
+                });
+
+                return;
+            }
+
+            if (typeof artist !== 'string' || !mongoose.isValidObjectId(artist)) {
+                res.status(400).send({
+                    message: 'Valid artist ID is required',
+                });
+
+                return;
+            }
+
+            const numericYear = typeof year === 'string'
+                    ? Number(year)
+                    : year;
+
+            if (typeof numericYear !== 'number' || !Number.isInteger(numericYear)) {
+                res.status(400).send({
+                    message: 'Year is required',
+                });
+
+                return;
+            }
+
+            const existingArtist = await Artist.findById(artist);
+
+            if (!existingArtist) {
+                res.status(400).send({
+                    message: 'Artist not found',
+                });
+
+                return;
+            }
+
+            const album = await Album.create({
+                name: name.trim(),
+                artist,
+                year: numericYear,
+                image,
             });
 
-            return;
-        }
+            res.status(201).send(album);
+        } catch (error) {
+            console.error(error);
 
-        if (!artist || !mongoose.isValidObjectId(artist)) {
-            res.status(400).send({
-                message: 'Valid artist ID is required',
+            res.status(500).send({
+                error: 'Internal server error',
             });
-
-            return;
         }
-
-        if (year === undefined || year === null || typeof year !== 'number') {
-            res.status(400).send({
-                message: 'Year is required',
-            });
-
-            return;
-        }
-
-        const existingArtist = await Artist.findById(artist);
-
-        if (!existingArtist) {
-            res.status(400).send({
-                message: 'Artist not found',
-            });
-
-            return;
-        }
-
-        const album = await Album.create({
-            name: name.trim(),
-            artist,
-            year,
-            image,
-        });
-
-        res.status(201).send(album);
-    } catch (error) {
-        console.error(error);
-
-        res.status(500).send({
-            message: 'Internal server error',
-        });
-    }
-});
+    },
+);
 
 export default albumsRouter;

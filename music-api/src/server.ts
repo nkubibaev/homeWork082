@@ -1,6 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
-
+import path from 'node:path';
+import config from './config.js';
 import artistsRouter from './routes/artists.js';
 import albumsRouter from './routes/albums.js';
 import tracksRouter from './routes/tracks.js';
@@ -11,6 +12,7 @@ const app = express();
 
 app.use(express.json());
 
+app.use('/images', express.static(path.join(config.publicPath, 'images')));
 app.use('/artists', artistsRouter);
 app.use('/albums', albumsRouter);
 app.use('/tracks', tracksRouter);
@@ -21,17 +23,14 @@ const PORT = 8000;
 
 const start = async () => {
     try {
-        await mongoose.connect(
-            'mongodb://127.0.0.1:27017/music-api',
-        );
-
+        await mongoose.connect('mongodb://127.0.0.1:27017/music-api');
         console.log('MongoDB connected');
 
         app.listen(PORT, () => {
             console.log(`Server started on port ${PORT}`);
         });
-    } catch (e) {
-        console.error('Failed to start server:', e);
+    } catch (error) {
+        console.error('Failed to start server:', error);
     }
 };
 
