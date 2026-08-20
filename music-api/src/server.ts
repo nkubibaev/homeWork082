@@ -7,9 +7,11 @@ import albumsRouter from './routes/albums.js';
 import tracksRouter from './routes/tracks.js';
 import usersRouter from './routes/users.js';
 import trackHistoryRouter from './routes/trackHistory.js';
+import cors from 'cors';
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
 app.use('/images', express.static(path.join(config.publicPath, 'images')));

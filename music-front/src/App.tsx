@@ -1,53 +1,55 @@
-import { NavLink, Route, Routes } from 'react-router-dom';
-import { AppBar, Box, Button, Container, Toolbar, Typography } from '@mui/material';
+import {
+    AppBar,
+    Button,
+    Container,
+    Toolbar,
+    Typography,
+} from '@mui/material';
 
-const HomePage = () => {
-  return (
-      <Box sx={{ py: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Music App
-        </Typography>
+import {
+    NavLink,
+    Route,
+    Routes,
+} from 'react-router-dom';
 
-        <Typography color="text.secondary">
-          Select an artist to see albums.
-        </Typography>
-      </Box>
-  );
-};
+import ArtistsPage from './pages/ArtistsPage';
 
 const App = () => {
-  return (
-      <>
-        <AppBar position="static">
-          <Toolbar>
-            <Typography
-                variant="h6"
-                component="div"
-                sx={{ flexGrow: 1 }}
-            >
-              Music App
-            </Typography>
+    return (
+        <>
+            <AppBar position="static">
+                <Toolbar>
+                    <Typography
+                        variant="h6"
+                        component="div"
+                        sx={{ flexGrow: 1 }}
+                    >
+                        Music App
+                    </Typography>
 
-            <Button
-                color="inherit"
-                component={NavLink}
-                to="/"
-            >
-              Artists
-            </Button>
-          </Toolbar>
-        </AppBar>
+                    <Button
+                        color="inherit"
+                        component={NavLink}
+                        to="/"
+                    >
+                        Artists
+                    </Button>
+                </Toolbar>
+            </AppBar>
 
-        <Container maxWidth="lg">
-          <Routes>
-            <Route
-                path="/"
-                element={<HomePage />}
-            />
-          </Routes>
-        </Container>
-      </>
-  );
+            <Container
+                maxWidth="lg"
+                sx={{ py: 4 }}
+            >
+                <Routes>
+                    <Route
+                        path="/"
+                        element={<ArtistsPage />}
+                    />
+                </Routes>
+            </Container>
+        </>
+    );
 };
 
 export default App;
