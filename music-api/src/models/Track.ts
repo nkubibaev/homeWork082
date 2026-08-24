@@ -21,6 +21,12 @@ const trackSchema = new Schema(
             required: true,
             trim: true,
         },
+        youtubeUrl: {
+            type: String,
+            required: false,
+            default: null,
+            trim: true,
+        }
     },
     {
         versionKey: false,

@@ -9,7 +9,7 @@ tracksRouter.get('/', async (req, res) => {
     try {
         const { album } = req.query;
 
-        if (album !== null) {
+        if (album != null) {
             if (
                 typeof album !== 'string' ||
                 !mongoose.isValidObjectId(album)
@@ -40,7 +40,7 @@ tracksRouter.get('/', async (req, res) => {
 
 tracksRouter.post('/', async (req, res) => {
     try {
-        const { name, album, trackNumber, duration } = req.body;
+        const { name, album, trackNumber, duration, youtubeUrl = null } = req.body;
 
         if (!name || typeof name !== 'string' || !name.trim()) {
             res.status(400).send({
@@ -81,6 +81,17 @@ tracksRouter.post('/', async (req, res) => {
             return;
         }
 
+        if (
+            youtubeUrl !== null &&
+            (typeof youtubeUrl !== 'string' || !youtubeUrl.trim())
+        ) {
+            res.status(400).send({
+                message: 'YouTube URL must be a non-empty string',
+            });
+
+            return;
+        }
+
         const existingAlbum = await Album.findById(album);
 
         if (!existingAlbum) {
@@ -96,6 +107,7 @@ tracksRouter.post('/', async (req, res) => {
             album,
             trackNumber,
             duration: duration.trim(),
+            youtubeUrl: youtubeUrl !== null ? youtubeUrl.trim() : null,
         });
 
         res.status(201).send(track);

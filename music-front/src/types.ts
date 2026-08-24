@@ -19,4 +19,5 @@ export interface Track {
     album: string;
     trackNumber: number;
     duration: string;
+    youtubeUrl: string | null;
 }
