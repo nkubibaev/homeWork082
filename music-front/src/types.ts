@@ -21,3 +21,8 @@ export interface Track {
     duration: string;
     youtubeUrl: string | null;
 }
+
+export interface User {
+    username: string;
+    token: string;
+}
