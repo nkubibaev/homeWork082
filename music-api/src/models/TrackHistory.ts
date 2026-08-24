@@ -9,17 +9,26 @@ const TrackHistorySchema = new Schema<TrackHistoryFields>({
         ref: 'User',
         required: true,
     },
+
     track: {
         type: Schema.Types.ObjectId,
         ref: 'Track',
         required: true,
     },
+
+    artist: {
+        type: Schema.Types.ObjectId,
+        ref: 'Artist',
+        required: true,
+    },
+
     datetime: {
         type: Date,
         required: true,
     },
 });
 
+const TrackHistory: Model<TrackHistoryFields> =
+    mongoose.model('TrackHistory', TrackHistorySchema);
 
-const TrackHistory: Model<TrackHistoryFields> = mongoose.model('TrackHistory', TrackHistorySchema);
 export default TrackHistory;

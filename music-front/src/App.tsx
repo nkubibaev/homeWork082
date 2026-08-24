@@ -6,6 +6,8 @@ import AlbumPage from './pages/AlbumPage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import { useAuthStore } from './store/authStore';
+import TrackHistoryPage from './pages/TrackHistoryPage';
+import ProtectedRoute from './components/ProtectedRoute';
 
 const App = () => {
     const user = useAuthStore((state) => state.user);
@@ -40,6 +42,16 @@ const App = () => {
 
                     {user ? (
                         <>
+                            <Button
+                                color="inherit"
+                                component={NavLink}
+                                to="/track-history"
+                                sx={{
+                                    fontWeight: 600,
+                                }}
+                            >
+                                Track History
+                            </Button>
                             <Typography
                                 sx={{
                                     ml: 2,
@@ -101,6 +113,8 @@ const App = () => {
                     <Route path="/albums/:id" element={<AlbumPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/login" element={<LoginPage />} />
+                    <Route path="/track-history" element={<TrackHistoryPage />} />
+                    <Route element={<ProtectedRoute />} />
                 </Routes>
             </Container>
         </Box>
