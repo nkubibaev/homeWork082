@@ -11,6 +11,7 @@ usersRouter.post('/', async (req, res) => {
         username: req.body.username,
         password: req.body.password,
         token: randomUUID(),
+        role: 'user',
     };
 
     try {
@@ -54,6 +55,30 @@ usersRouter.post('/sessions', async (req, res) => {
     await user.save();
 
     res.send(user);
+});
+
+usersRouter.delete('/sessions', async (req, res) => {
+    const token = req.headers.authorization;
+
+    if (!token) {
+        return res.status(401).send({
+            message: 'Authorization token is required',
+        });
+    }
+
+    const user = await User.findOne({ token });
+
+    if (!user) {
+        return res.status(401).send({
+            message: 'Invalid authorization token',
+        });
+    }
+
+    user.token = randomUUID();
+
+    await user.save();
+
+    res.sendStatus(204);
 });
 
 export default usersRouter;
