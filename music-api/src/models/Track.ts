@@ -1,4 +1,4 @@
-import { Schema, model, Types } from 'mongoose';
+import { Schema, model } from 'mongoose';
 
 const trackSchema = new Schema(
     {
@@ -8,7 +8,7 @@ const trackSchema = new Schema(
             trim: true,
         },
         album: {
-            type: Types.ObjectId,
+            type: Schema.Types.ObjectId,
             ref: 'Album',
             required: true,
         },
@@ -26,7 +26,17 @@ const trackSchema = new Schema(
             required: false,
             default: null,
             trim: true,
-        }
+        },
+        user: {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+            required: true,
+        },
+        isPublished: {
+            type: Boolean,
+            default: false,
+            required: true,
+        },
     },
     {
         versionKey: false,

@@ -3,29 +3,63 @@ import mongoose from 'mongoose';
 import Album from '../models/Album.js';
 import Artist from '../models/Artist.js';
 import { imagesUpload } from '../multer.js';
+import { getAuthUser, optionalAuth, requireAuth } from '../middleware/auth.js';
 
 const albumsRouter = Router();
+albumsRouter.use(optionalAuth);
+
+const canViewEntity = (
+    user: ReturnType<typeof getAuthUser>,
+    entity: {
+        isPublished: boolean;
+        user: mongoose.Types.ObjectId;
+    },
+) => {
+    if (!user) {
+        return entity.isPublished;
+    }
+
+    if (user.role === 'admin') {
+        return true;
+    }
+
+    return ( entity.isPublished ||  entity.user.equals(user._id));
+};
 
 albumsRouter.get('/', async (req, res) => {
     try {
+        const user = getAuthUser(req);
         const { artist = null } = req.query;
 
-        if (artist !== null) {
-            if (typeof artist !== 'string' || !mongoose.isValidObjectId(artist)) {
-                res.status(400).send({
-                    error: 'Invalid artist ID',
-                });
-
-                return;
-            }
-
-            const albums = await Album.find({ artist }).sort({ year: -1 });
-            res.send(albums);
+        if (artist !== null && (typeof artist !== 'string' || !mongoose.isValidObjectId(artist))) {
+            res.status(400).send({
+                error: 'Invalid artist ID',
+            });
 
             return;
         }
 
-        const albums = await Album.find().sort({ year: -1 });
+        let filter: Record<string, unknown> = {};
+
+        if (!user) {
+            filter = {
+                isPublished: true,
+            };
+        } else if (user.role !== 'admin') {
+            filter = {
+                $or: [
+                    { isPublished: true },
+                    { isPublished: false, user: user._id }
+                ]
+            };
+        }
+
+        if (artist !== null) {
+            filter.artist = artist;
+        }
+
+        const albums = await Album.find(filter).sort({ year: -1 });
+
         res.send(albums);
     } catch (error) {
         console.error(error);
@@ -40,7 +74,7 @@ albumsRouter.get('/:id', async (req, res) => {
     try {
         const { id = null } = req.params;
 
-        if ( id === null || !mongoose.isValidObjectId(id)) {
+        if (id === null || !mongoose.isValidObjectId(id)) {
             res.status(400).send({
                 message: 'Invalid album ID',
             });
@@ -48,9 +82,10 @@ albumsRouter.get('/:id', async (req, res) => {
             return;
         }
 
+        const user = getAuthUser(req);
         const album = await Album.findById(id);
 
-        if (!album) {
+        if (album === null || !canViewEntity(user, album)) {
             res.status(404).send({
                 message: 'Album not found',
             });
@@ -60,7 +95,7 @@ albumsRouter.get('/:id', async (req, res) => {
 
         const artist = await Artist.findById(album.artist);
 
-        if (!artist) {
+        if (artist === null || !canViewEntity(user, artist)) {
             res.status(404).send({
                 message: 'Artist not found',
             });
@@ -68,10 +103,7 @@ albumsRouter.get('/:id', async (req, res) => {
             return;
         }
 
-        res.send({
-            ...album.toObject(),
-            artist,
-        });
+        res.send({ ...album.toObject(), artist });
     } catch (error) {
         console.error(error);
 
@@ -81,13 +113,20 @@ albumsRouter.get('/:id', async (req, res) => {
     }
 });
 
-albumsRouter.post('/', imagesUpload.single('image'),
+albumsRouter.post('/', requireAuth, imagesUpload.single('image'),
     async (req, res) => {
         try {
+            const user = getAuthUser(req);
+
+            if (!user) {
+                res.status(401).send({
+                    message: 'Authentication required',
+                });
+
+                return;
+            }
+
             const { name = null, artist = null, year = null } = req.body;
-            const image = req.file
-                ? `/images/${req.file.filename}`
-                : null;
 
             if (typeof name !== 'string' || !name.trim()) {
                 res.status(400).send({
@@ -105,11 +144,9 @@ albumsRouter.post('/', imagesUpload.single('image'),
                 return;
             }
 
-            const numericYear = typeof year === 'string'
-                    ? Number(year)
-                    : year;
+            const numericYear = typeof year === 'string' ? Number(year) : year;
 
-            if (typeof numericYear !== 'number' || !Number.isInteger(numericYear)) {
+            if ( typeof numericYear !== 'number' || !Number.isInteger(numericYear)) {
                 res.status(400).send({
                     message: 'Year is required',
                 });
@@ -127,11 +164,25 @@ albumsRouter.post('/', imagesUpload.single('image'),
                 return;
             }
 
+            if (!canViewEntity(user, existingArtist)) {
+                res.status(403).send({
+                    message: 'Artist is not available for this user',
+                });
+
+                return;
+            }
+
+            const image = req.file?.filename
+                ? `/images/${req.file.filename}`
+                : null;
+
             const album = await Album.create({
                 name: name.trim(),
                 artist,
                 year: numericYear,
                 image,
+                user: user._id,
+                isPublished: false,
             });
 
             res.status(201).send(album);

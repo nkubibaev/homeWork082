@@ -1,5 +1,5 @@
+import type { Request, RequestHandler, Response, NextFunction } from 'express';
 import type { HydratedDocument } from 'mongoose';
-import type { Request, Response, NextFunction } from 'express';
 import User from '../models/User.js';
 import type { UserFields } from '../types.js';
 
@@ -15,15 +15,16 @@ export const findUserByToken = async (token: string | null) => {
     return User.findOne({ token });
 };
 
-export const optionalAuth = async (
-    req: AuthRequest,
-    _res: Response,
-    next: NextFunction,
+export const optionalAuth: RequestHandler = async (
+    req,
+    _res,
+    next,
 ) => {
     try {
         const token = req.headers.authorization ?? null;
+        const user = await findUserByToken(token);
 
-        req.user = await findUserByToken(token);
+        (req as AuthRequest).user = user;
 
         next();
     } catch (error) {
@@ -31,35 +32,38 @@ export const optionalAuth = async (
     }
 };
 
-export const requireAuth = async (
-    req: AuthRequest,
-    res: Response,
-    next: NextFunction,
+export const requireAuth: RequestHandler = async (
+    req,
+    res,
+    next,
 ) => {
     try {
         const token = req.headers.authorization ?? null;
         const user = await findUserByToken(token);
 
-        if (!user) {
+        if (user === null) {
             res.status(401).send({
                 message: 'Invalid or missing authorization token',
             });
             return;
         }
 
-        req.user = user;
+        (req as AuthRequest).user = user;
+
         next();
     } catch (error) {
         next(error);
     }
 };
 
-export const requireAdmin = (
-    req: AuthRequest,
-    res: Response,
-    next: NextFunction,
+export const requireAdmin: RequestHandler = (
+    req,
+    res,
+    next,
 ) => {
-    if (!req.user || req.user.role !== 'admin') {
+    const authRequest = req as AuthRequest;
+
+    if (authRequest.user === null || authRequest.user.role !== 'admin') {
         res.status(403).send({
             message: 'Administrator access required',
         });
@@ -67,4 +71,8 @@ export const requireAdmin = (
     }
 
     next();
+};
+
+export const getAuthUser = (req: Request) => {
+    return (req as AuthRequest).user;
 };

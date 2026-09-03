@@ -1,4 +1,4 @@
-import { Schema, model, Types } from 'mongoose';
+import { Schema, model } from 'mongoose';
 
 const albumSchema = new Schema(
     {
@@ -7,21 +7,28 @@ const albumSchema = new Schema(
             required: true,
             trim: true,
         },
-
         artist: {
-            type: Types.ObjectId,
+            type: Schema.Types.ObjectId,
             ref: 'Artist',
             required: true,
         },
-
         year: {
             type: Number,
             required: true,
         },
-
         image: {
             type: String,
             required: false,
+        },
+        user: {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+            required: true,
+        },
+        isPublished: {
+            type: Boolean,
+            default: false,
+            required: true,
         },
     },
     {
