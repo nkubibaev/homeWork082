@@ -3,7 +3,8 @@ import mongoose from 'mongoose';
 import Album from '../models/Album.js';
 import Artist from '../models/Artist.js';
 import { imagesUpload } from '../multer.js';
-import { getAuthUser, optionalAuth, requireAuth } from '../middleware/auth.js';
+import {getAuthUser, optionalAuth, requireAdmin, requireAuth} from '../middleware/auth.js';
+import {removeImage} from "../utils/files.js";
 
 const albumsRouter = Router();
 albumsRouter.use(optionalAuth);
@@ -186,6 +187,103 @@ albumsRouter.post('/', requireAuth, imagesUpload.single('image'),
             });
 
             res.status(201).send(album);
+        } catch (error) {
+            console.error(error);
+
+            res.status(500).send({
+                error: 'Internal server error',
+            });
+        }
+    },
+);
+
+albumsRouter.delete('/:id', requireAuth,
+    async (req, res) => {
+        try {
+            const user = getAuthUser(req);
+
+            if (!user) {
+                res.status(401).send({
+                    message: 'Authentication required',
+                });
+
+                return;
+            }
+
+            const { id = null } = req.params;
+
+            if (id === null || !mongoose.isValidObjectId(id)) {
+                res.status(400).send({
+                    message: 'Invalid album ID',
+                });
+
+                return;
+            }
+
+            const album = await Album.findById(id);
+
+            if (!album) {
+                res.status(404).send({
+                    message: 'Album not found',
+                });
+
+                return;
+            }
+
+            const isAdmin = user.role === 'admin';
+
+            const isOwnerDraft = album.isPublished === false && album.user.equals(user._id);
+
+            if (!isAdmin && !isOwnerDraft) {
+                res.status(403).send({
+                    message: 'You cannot delete this album',
+                });
+
+                return;
+            }
+
+            await removeImage(album.image ?? null);
+            await album.deleteOne();
+
+            res.sendStatus(204);
+        } catch (error) {
+            console.error(error);
+
+            res.status(500).send({
+                error: 'Internal server error',
+            });
+        }
+    },
+);
+
+albumsRouter.patch('/:id/togglePublished', requireAuth, requireAdmin,
+    async (req, res) => {
+        try {
+            const { id = null } = req.params;
+
+            if (id === null || !mongoose.isValidObjectId(id)) {
+                res.status(400).send({
+                    message: 'Invalid album ID',
+                });
+
+                return;
+            }
+
+            const album = await Album.findById(id);
+
+            if (!album) {
+                res.status(404).send({
+                    message: 'Album not found',
+                });
+
+                return;
+            }
+
+            album.isPublished = !album.isPublished;
+
+            await album.save();
+
+            res.send(album);
         } catch (error) {
             console.error(error);
 
