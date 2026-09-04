@@ -9,6 +9,9 @@ import TrackHistoryPage from './pages/TrackHistoryPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useAuthStore } from './store/authStore';
 import axiosApi from './api/axiosApi';
+import AddArtistPage from './pages/AddArtistPage';
+import AddAlbumPage from './pages/AddAlbumPage';
+import AddTrackPage from './pages/AddTrackPage';
 
 const App = () => {
     const navigate = useNavigate();
@@ -54,6 +57,27 @@ const App = () => {
 
                     {user ? (
                         <>
+                        <Button
+                            color="inherit"
+                            component={NavLink}
+                            to="/add/artist"
+                        >
+                            Add artist
+                        </Button>
+                        <Button
+                            color="inherit"
+                            component={NavLink}
+                            to="/add/album"
+                        >
+                            Add album
+                        </Button>
+                        <Button
+                            color="inherit"
+                            component={NavLink}
+                            to="/add/track"
+                        >
+                            Add track
+                        </Button>
                             <Button
                                 color="inherit"
                                 component={NavLink}
@@ -114,8 +138,12 @@ const App = () => {
                     <Route path="/albums/:id" element={<AlbumPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/login" element={<LoginPage />} />
-                    <Route path="/track-history" element={<TrackHistoryPage />} />
-                    <Route element={<ProtectedRoute />} />
+                    <Route element={<ProtectedRoute />}>
+                        <Route path="/track-history" element={<TrackHistoryPage />} />
+                        <Route path="/add/artist" element={<AddArtistPage />} />
+                        <Route path="/add/album" element={<AddAlbumPage />} />
+                        <Route path="/add/track" element={<AddTrackPage />} />
+                    </Route>
                 </Routes>
             </Container>
         </Box>
