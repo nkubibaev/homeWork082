@@ -1,17 +1,29 @@
 import { AppBar, Box, Button, Container, Toolbar, Typography } from '@mui/material';
-import { NavLink, Route, Routes } from 'react-router-dom';
+import { NavLink, Route, Routes, useNavigate } from 'react-router-dom';
 import ArtistsPage from './pages/ArtistsPage';
 import ArtistPage from './pages/ArtistPage';
 import AlbumPage from './pages/AlbumPage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
-import { useAuthStore } from './store/authStore';
 import TrackHistoryPage from './pages/TrackHistoryPage';
 import ProtectedRoute from './components/ProtectedRoute';
+import { useAuthStore } from './store/authStore';
+import axiosApi from './api/axiosApi';
 
 const App = () => {
+    const navigate = useNavigate();
     const user = useAuthStore((state) => state.user);
     const logout = useAuthStore((state) => state.logout);
+    const handleLogout = async () => {
+        try {
+            await axiosApi.delete('/users/sessions');
+        } catch (error) {
+            console.error(error);
+        } finally {
+            logout();
+            navigate('/');
+        }
+    };
 
     return (
         <Box
@@ -24,13 +36,13 @@ const App = () => {
                 position="sticky"
                 elevation={0}
             >
-                <Toolbar>
+                <Toolbar sx={{ gap: 1 }}>
                     <Typography
                         variant="h5"
                         component={NavLink}
                         to="/"
                         sx={{
-                            flexGrow: 1,
+                            mr: 'auto',
                             color: 'inherit',
                             textDecoration: 'none',
                             fontWeight: 700,
@@ -46,28 +58,23 @@ const App = () => {
                                 color="inherit"
                                 component={NavLink}
                                 to="/track-history"
-                                sx={{
-                                    fontWeight: 600,
-                                }}
                             >
                                 Track History
                             </Button>
                             <Typography
                                 sx={{
-                                    ml: 2,
-                                    mr: 2,
+                                    ml: 1,
+                                    mr: 1,
                                     fontWeight: 600,
                                 }}
                             >
                                 {user.username}
                             </Typography>
-
                             <Button
                                 color="inherit"
-                                onClick={logout}
-                                sx={{
-                                    fontWeight: 600,
-                                }}
+                                onClick={() =>
+                                    void handleLogout()
+                                }
                             >
                                 Logout
                             </Button>
@@ -78,9 +85,6 @@ const App = () => {
                                 color="inherit"
                                 component={NavLink}
                                 to="/register"
-                                sx={{
-                                    fontWeight: 600,
-                                }}
                             >
                                 Sign Up
                             </Button>
@@ -88,9 +92,6 @@ const App = () => {
                                 color="inherit"
                                 component={NavLink}
                                 to="/login"
-                                sx={{
-                                    fontWeight: 600,
-                                }}
                             >
                                 Sign In
                             </Button>

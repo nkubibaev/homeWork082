@@ -1,8 +1,19 @@
+export type UserRole = 'admin' | 'user';
+
+export interface User {
+    _id: string;
+    username: string;
+    token: string;
+    role: UserRole;
+}
+
 export interface Artist {
     _id: string;
     name: string;
     photo: string | null;
     information: string | null;
+    user: string;
+    isPublished: boolean;
 }
 
 export interface Album {
@@ -11,6 +22,8 @@ export interface Album {
     artist: string;
     year: number;
     image: string | null;
+    user: string;
+    isPublished: boolean;
 }
 
 export interface Track {
@@ -20,9 +33,14 @@ export interface Track {
     trackNumber: number;
     duration: string;
     youtubeUrl: string | null;
+    user: string;
+    isPublished: boolean;
 }
 
-export interface User {
-    username: string;
-    token: string;
+export interface TrackHistory {
+    _id: string;
+    user: string;
+    track: string;
+    artist: string;
+    datetime: string;
 }

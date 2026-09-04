@@ -1,9 +1,5 @@
 import { create } from 'zustand';
-
-interface User {
-    username: string;
-    token: string;
-}
+import type { User } from '../types';
 
 interface AuthState {
     user: User | null;
@@ -11,28 +7,40 @@ interface AuthState {
     logout: () => void;
 }
 
-const storedUser = localStorage.getItem('user');
+const getStoredUser = (): User | null => {
+    const storedUser = localStorage.getItem('user');
 
-const initialUser: User | null = storedUser
-    ? JSON.parse(storedUser)
-    : null;
+    if (!storedUser) {
+        return null;
+    }
+
+    try {
+        const user = JSON.parse(storedUser) as User;
+
+        if (!user._id || !user.username || !user.token || !user.role) {
+            localStorage.removeItem('user');
+            return null;
+        }
+
+        return user;
+    } catch {
+        localStorage.removeItem('user');
+        return null;
+    }
+};
 
 export const useAuthStore = create<AuthState>((set) => ({
-    user: initialUser,
+    user: getStoredUser(),
 
     login: (user) => {
         localStorage.setItem('user', JSON.stringify(user));
 
-        set({
-            user,
-        });
+        set({ user });
     },
 
     logout: () => {
         localStorage.removeItem('user');
 
-        set({
-            user: null,
-        });
+        set({ user: null });
     },
 }));
