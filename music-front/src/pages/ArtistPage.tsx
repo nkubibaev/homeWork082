@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { Alert, CircularProgress, Grid } from '@mui/material';
+import {useNavigate, useParams} from 'react-router-dom';
+import {Alert, Button, CircularProgress, Grid, Typography} from '@mui/material';
 import axiosApi from '../api/axiosApi';
 import type { Album, Artist } from '../types';
 import AlbumCard from '../components/AlbumCard';
 import BackButton from '../components/BackButton';
 import PageTitle from '../components/PageTitle';
+import { canDeleteEntity, canPublishEntity } from '../utils/entityPermissions';
+import {useAuthStore} from "../store/authStore.ts";
 
 const ArtistPage = () => {
     const { id = null } = useParams();
@@ -13,6 +15,8 @@ const ArtistPage = () => {
     const [albums, setAlbums] = useState<Album[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const user = useAuthStore((state) => state.user);
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (id === null) {
@@ -43,6 +47,46 @@ const ArtistPage = () => {
 
         void fetchArtist();
     }, [id]);
+
+    const handleDelete = async () => {
+        if (artist === null) {
+            return;
+        }
+
+        if (!canDeleteEntity(user, artist)) {
+            return;
+        }
+
+        try {
+            await axiosApi.delete(
+                `/artists/${artist._id}`,
+            );
+
+            navigate('/');
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const handleTogglePublished = async () => {
+        if (artist === null) {
+            return;
+        }
+
+        if (!canPublishEntity(user)) {
+            return;
+        }
+
+        try {
+            const response = await axiosApi.patch<Artist>(
+                `/artists/${artist._id}/togglePublished`,
+            );
+
+            setArtist(response.data);
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     if (loading) {
         return <CircularProgress />;
@@ -85,6 +129,40 @@ const ArtistPage = () => {
                         }}
                     >
                         <AlbumCard album={album} />
+                        {!artist.isPublished && (
+                            <Typography
+                                color="warning.main"
+                                sx={{
+                                    fontWeight: 700,
+                                    mt: 1,
+                                }}
+                            >
+                                Not published
+                            </Typography>
+                        )}
+                        {canDeleteEntity(user, artist) && (
+                            <Button
+                                color="error"
+                                variant="outlined"
+                                onClick={() =>
+                                    void handleDelete()
+                                }
+                            >
+                                Delete
+                            </Button>
+                        )}
+
+                        {canPublishEntity(user) &&
+                            !artist.isPublished && (
+                                <Button
+                                    variant="contained"
+                                    onClick={() =>
+                                        void handleTogglePublished()
+                                    }
+                                >
+                                    Publish
+                                </Button>
+                            )}
                     </Grid>
                 ))}
             </Grid>
