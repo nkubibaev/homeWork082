@@ -5,6 +5,8 @@ export interface User {
     username: string;
     token: string;
     role: UserRole;
+    displayName: string;
+    avatar: string | null;
 }
 
 export interface Artist {

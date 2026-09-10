@@ -3,21 +3,35 @@ import { randomUUID } from 'node:crypto';
 import bcrypt from 'bcrypt';
 import User from '../models/User.js';
 import { UserFields } from '../types.js';
+import { imagesUpload } from '../multer.js';
 
 const usersRouter: Router = express.Router();
 
-usersRouter.post('/', async (req, res) => {
-    const displayName = req.body.displayName
-        ? req.body.displayName
-        : req.body.username;
+usersRouter.post('/', imagesUpload.single('avatar'), async (req, res) => {
+    const username = req.body.username;
+    const password = req.body.password;
+    const displayName = req.body.displayName;
+
+    if (
+        typeof username !== 'string' ||
+        !username.trim() ||
+        typeof password !== 'string' ||
+        !password.trim() ||
+        typeof displayName !== 'string' ||
+        !displayName.trim()
+    ) {
+        return res.status(400).send({
+            message: 'Username, password and display name are required',
+        });
+    }
 
     const userData: UserFields = {
-        username: req.body.username,
-        password: req.body.password,
+        username: username.trim(),
+        password,
         token: randomUUID(),
         role: 'user',
-        displayName,
-        avatar: null,
+        displayName: displayName.trim(),
+        avatar: req.file ? `/images/${req.file.filename}` : null,
         googleID: null,
     };
 

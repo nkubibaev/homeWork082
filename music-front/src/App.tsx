@@ -1,4 +1,4 @@
-import { AppBar, Box, Button, Container, Toolbar, Typography } from '@mui/material';
+import { AppBar, Avatar, Box, Button, Container, Toolbar, Typography } from '@mui/material';
 import { NavLink, Route, Routes, useNavigate } from 'react-router-dom';
 import ArtistsPage from './pages/ArtistsPage';
 import ArtistPage from './pages/ArtistPage';
@@ -85,15 +85,29 @@ const App = () => {
                             >
                                 Track History
                             </Button>
-                            <Typography
+                            <Box
                                 sx={{
-                                    ml: 1,
-                                    mr: 1,
-                                    fontWeight: 600,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 1,
+                                    ml: 2,
                                 }}
                             >
-                                {user.username}
-                            </Typography>
+                                {user.avatar ? (
+                                    <Avatar
+                                        src={`http://localhost:8000${user.avatar}`}
+                                        alt={user.displayName}
+                                    />
+                                ) : (
+                                    <Avatar>
+                                        {user.displayName.charAt(0).toUpperCase()}
+                                    </Avatar>
+                                )}
+
+                                <Typography>
+                                    {user.displayName}
+                                </Typography>
+                            </Box>
                             <Button
                                 color="inherit"
                                 onClick={() =>

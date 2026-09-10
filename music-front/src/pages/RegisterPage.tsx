@@ -8,6 +8,8 @@ const RegisterPage = () => {
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [displayName, setDisplayName] = useState('');
+    const [avatar, setAvatar] = useState<File | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
@@ -18,7 +20,17 @@ const RegisterPage = () => {
         setLoading(true);
 
         try {
-            await axiosApi.post('/users', { username, password });
+            const formData = new FormData();
+            formData.append('username', username);
+            formData.append('password', password);
+            formData.append('displayName', displayName);
+
+            if (avatar) {
+                formData.append('avatar', avatar);
+            }
+
+            await axiosApi.post('/users', formData);
+
             navigate('/login');
         } catch (error) {
             console.error(error);
@@ -45,7 +57,12 @@ const RegisterPage = () => {
                         p: 4,
                     }}
                 >
-                    <Typography variant="h4" component="h1" sx={{ mb: 3, textAlign: 'center' }}>
+                    <Typography variant="h4" component="h1"
+                        sx={{
+                            mb: 3,
+                            textAlign: 'center',
+                        }}
+                    >
                         Register
                     </Typography>
 
@@ -68,6 +85,16 @@ const RegisterPage = () => {
                         />
                         <TextField
                             fullWidth
+                            label="Display Name"
+                            value={displayName}
+                            onChange={(event) =>
+                                setDisplayName(event.target.value)
+                            }
+                            margin="normal"
+                            required
+                        />
+                        <TextField
+                            fullWidth
                             label="Password"
                             type="password"
                             value={password}
@@ -78,23 +105,49 @@ const RegisterPage = () => {
                             required
                         />
                         <Button
+                            component="label"
+                            variant="outlined"
+                            fullWidth
+                            sx={{ mt: 2 }}
+                        >
+                            Choose Avatar
+                            <input
+                                type="file"
+                                accept="image/*"
+                                hidden
+                                onChange={(event) => {
+                                    const files = event.target.files;
+
+                                    if (files && files.length > 0) {
+                                        setAvatar(files[0]);
+                                    } else {
+                                        setAvatar(null);
+                                    }
+                                }}
+                            />
+                        </Button>
+                        <Typography
+                            variant="body2"
+                            sx={{
+                                mt: 1,
+                                color: 'text.secondary',
+                            }}
+                        >
+                            {avatar ? avatar.name : 'No avatar selected'}
+                        </Typography>
+                        <Button
                             fullWidth
                             type="submit"
                             variant="contained"
                             disabled={loading}
                             sx={{ mt: 2 }}
                         >
-                            {loading
-                                ? 'Register...'
-                                : 'Register'}
+                            {loading ? 'Register...' : 'Register'}
                         </Button>
                     </Box>
-                    <Typography sx={{ mt: 3, textAlign: 'center' }}>
-                        Do you already have an account?
-                        <Link
-                            component={RouterLink}
-                            to="/login"
-                        >
+                    <Typography sx={{ mt: 3, textAlign: 'center'}}>
+                        Do you already have an account?{' '}
+                        <Link component={RouterLink} to="/login">
                             Login
                         </Link>
                     </Typography>

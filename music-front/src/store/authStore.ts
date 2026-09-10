@@ -17,7 +17,7 @@ const getStoredUser = (): User | null => {
     try {
         const user = JSON.parse(storedUser) as User;
 
-        if (!user._id || !user.username || !user.token || !user.role) {
+        if (!user._id || !user.username || !user.token || !user.role || !user.displayName) {
             localStorage.removeItem('user');
             return null;
         }
@@ -34,13 +34,11 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     login: (user) => {
         localStorage.setItem('user', JSON.stringify(user));
-
         set({ user });
     },
 
     logout: () => {
         localStorage.removeItem('user');
-
         set({ user: null });
     },
 }));
