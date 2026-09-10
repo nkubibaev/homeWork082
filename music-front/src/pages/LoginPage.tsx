@@ -1,6 +1,7 @@
 import { type SubmitEvent, useState } from 'react';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { Alert, Box, Button, Container, Link, Paper, TextField, Typography } from '@mui/material';
+import { GoogleLogin } from '@react-oauth/google';
 import axiosApi from '../api/axiosApi';
 import { useAuthStore } from '../store/authStore';
 
@@ -31,6 +32,23 @@ const LoginPage = () => {
         }
     };
 
+    const googleLoginHandler = async (credential: string) => {
+        setError(null);
+        setLoading(true);
+
+        try {
+            const response = await axiosApi.post('/users/google', { credential });
+
+            login(response.data);
+            navigate('/');
+        } catch (error) {
+            console.error(error);
+            setError('Google login failed');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <Container maxWidth="sm">
             <Box
@@ -48,7 +66,7 @@ const LoginPage = () => {
                         p: 4,
                     }}
                 >
-                    <Typography variant="h4" component="h1" sx={{ mb: 3, textAlign: 'center' }}>
+                    <Typography variant="h4" component="h1" sx={{ mb: 3, textAlign: 'center'}}>
                         Login
                     </Typography>
 
@@ -89,6 +107,24 @@ const LoginPage = () => {
                         >
                             {loading ? 'Login...' : 'Login'}
                         </Button>
+                    </Box>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            mt: 3,
+                        }}
+                    >
+                        <GoogleLogin
+                            onSuccess={(credentialResponse) => {
+                                if (credentialResponse.credential) {
+                                    googleLoginHandler(credentialResponse.credential);
+                                }
+                            }}
+                            onError={() => {
+                                setError('Google login failed');
+                            }}
+                        />
                     </Box>
                     <Typography sx={{ mt: 3, textAlign: 'center' }}>
                         No account?

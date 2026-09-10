@@ -1,11 +1,15 @@
 import express, { Router } from 'express';
 import { randomUUID } from 'node:crypto';
 import bcrypt from 'bcrypt';
+import { OAuth2Client } from 'google-auth-library';
 import User from '../models/User.js';
 import { UserFields } from '../types.js';
 import { imagesUpload } from '../multer.js';
+import config from '../config.js';
 
 const usersRouter: Router = express.Router();
+
+const client = new OAuth2Client(config.google.clientId);
 
 usersRouter.post('/', imagesUpload.single('avatar'), async (req, res) => {
     const username = req.body.username;
@@ -49,6 +53,72 @@ usersRouter.post('/', imagesUpload.single('avatar'), async (req, res) => {
         }
 
         res.sendStatus(500);
+    }
+});
+
+usersRouter.post('/google', async (req, res) => {
+    const credential = req.body.credential;
+
+    if (typeof credential !== 'string' || !credential) {
+        return res.status(400).send({
+            message: 'Google credential is required',
+        });
+    }
+
+    try {
+        const ticket = await client.verifyIdToken({
+            idToken: credential,
+            audience: config.google.clientId,
+        });
+
+        const payload = ticket.getPayload();
+
+        if (!payload) {
+            return res.status(400).send({
+                message: 'Invalid Google credential',
+            });
+        }
+
+        const googleID = payload.sub;
+        const email = payload.email;
+        const displayName = payload.name;
+        const avatar = payload.picture;
+
+        if (!googleID || !email || !displayName) {
+            return res.status(400).send({
+                message: 'Google account data is incorrect',
+            });
+        }
+
+        let user = await User.findOne({
+            googleID,
+        });
+
+        if (!user) {
+            user = new User({
+                username: email,
+                password: randomUUID(),
+                token: randomUUID(),
+                role: 'user',
+                displayName,
+                avatar: avatar ? avatar : null,
+                googleID
+            });
+
+            await user.save();
+        } else {
+            user.token = randomUUID();
+
+            await user.save();
+        }
+
+        res.send(user);
+    } catch (e) {
+        console.error(e);
+
+        return res.status(400).send({
+            message: 'Invalid Google credential',
+        });
     }
 });
 
