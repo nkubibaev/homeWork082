@@ -12,6 +12,7 @@ import axiosApi from './api/axiosApi';
 import AddArtistPage from './pages/AddArtistPage';
 import AddAlbumPage from './pages/AddAlbumPage';
 import AddTrackPage from './pages/AddTrackPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 const App = () => {
     const navigate = useNavigate();
@@ -158,6 +159,7 @@ const App = () => {
                         <Route path="/add/album" element={<AddAlbumPage />} />
                         <Route path="/add/track" element={<AddTrackPage />} />
                     </Route>
+                    <Route path="*" element={<NotFoundPage />} />
                 </Routes>
             </Container>
         </Box>
