@@ -25,6 +25,19 @@ const UserSchema = new Schema<UserFields>({
         default: 'user',
         required: true,
     },
+    displayName: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    avatar: {
+        type: String,
+        default: null,
+    },
+    googleID: {
+        type: String,
+        default: null,
+    }
 });
 
 UserSchema.pre('save', async function () {

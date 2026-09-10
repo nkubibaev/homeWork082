@@ -7,11 +7,18 @@ import { UserFields } from '../types.js';
 const usersRouter: Router = express.Router();
 
 usersRouter.post('/', async (req, res) => {
+    const displayName = req.body.displayName
+        ? req.body.displayName
+        : req.body.username;
+
     const userData: UserFields = {
         username: req.body.username,
         password: req.body.password,
         token: randomUUID(),
         role: 'user',
+        displayName,
+        avatar: null,
+        googleID: null,
     };
 
     try {

@@ -10,13 +10,34 @@ const ensureUsers = async () => {
     const existingUsers = await User.find();
 
     for (const currentUser of existingUsers) {
-        if (currentUser.username === 'admin') {
-            if (currentUser.role !== 'admin') {
-                currentUser.role = 'admin';
-                await currentUser.save();
-            }
-        } else if (currentUser.role !== 'user') {
+        let changed = false;
+
+        if (currentUser.username === 'admin' && currentUser.role !== 'admin') {
+            currentUser.role = 'admin';
+            changed = true;
+        }
+
+        if (currentUser.username !== 'admin' && currentUser.role !== 'user') {
             currentUser.role = 'user';
+            changed = true;
+        }
+
+        if (!currentUser.displayName) {
+            currentUser.displayName = currentUser.username;
+            changed = true;
+        }
+
+        if (!currentUser.avatar) {
+            currentUser.avatar = null;
+            changed = true;
+        }
+
+        if (!currentUser.googleID) {
+            currentUser.googleID = null;
+            changed = true;
+        }
+
+        if (changed) {
             await currentUser.save();
         }
     }
@@ -31,6 +52,9 @@ const ensureUsers = async () => {
             password: 'admin',
             token: randomUUID(),
             role: 'admin',
+            displayName: 'Administrator',
+            avatar: null,
+            googleID: null,
         });
     } else if (admin.role !== 'admin') {
         admin.role = 'admin';
@@ -47,6 +71,9 @@ const ensureUsers = async () => {
             password: 'user',
             token: randomUUID(),
             role: 'user',
+            displayName: 'Test User',
+            avatar: null,
+            googleID: null,
         });
     } else if (user.role !== 'user') {
         user.role = 'user';
@@ -58,7 +85,6 @@ const ensureUsers = async () => {
         user,
     };
 };
-
 
 const run = async () => {
     await mongoose.connect(config.mongoDbUrl);

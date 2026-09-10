@@ -16,7 +16,7 @@ const ArtistsPage = () => {
                 setLoading(true);
                 setError(null);
 
-                const response = await axiosApi<Artist[]>('/artists');
+                const response = await axiosApi.get<Artist[]>('/artists');
 
                 setArtists(response.data);
             } catch {

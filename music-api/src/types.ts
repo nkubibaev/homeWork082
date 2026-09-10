@@ -7,6 +7,9 @@ export interface UserFields {
     password: string;
     token: string;
     role: UserRole;
+    displayName: string;
+    avatar: string | null;
+    googleID: string | null;
 }
 
 export interface TrackHistoryFields {
